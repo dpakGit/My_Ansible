@@ -23,13 +23,13 @@ add-apt-repository --yes --update ppa:ansible/ansible
 apt install ansible -y
 ```
 
-Step 2: Configuring Ansible Inventory File
+- Step 2: Configuring Ansible Inventory File
 
 1. Open the inventory file: `sudo vi /etc/ansible/hosts`
 
 2. Add IPs of the Managed Nodes in the "hosts" file.
 
-Step 3: Creating a User on Control Node and Managed Nodes
+- Step 3: Creating a User on Control Node and Managed Nodes
 
 1. Become a root user: sudo su
 
@@ -39,7 +39,7 @@ Step 3: Creating a User on Control Node and Managed Nodes
 
 4. Repeat the process on the Managed Nodes.
 
-Step 4: Updating SSHD Config File
+- Step 4: Updating SSHD Config File
 
 1. Open the SSH config file: `sudo vi /etc/ssh/sshd_config`
 
@@ -65,7 +65,7 @@ Step 4: Updating SSHD Config File
       
 3. Repeat the steps on Managed Nodes.
 
-Step 5: Enabling Password Authentication
+- Step 5: Enabling Password Authentication
 
 1. Open the SSH config file: `sudo vi /etc/ssh/sshd_config.d/60-cloudimg-settings.conf`
 
@@ -81,7 +81,7 @@ sudo systemctl restart sshd
 sudo service ssh restart
 ```
 
-Step 6: Configuring Sudo Privileges for Ansible
+- Step 6: Configuring Sudo Privileges for Ansible
 
 1. Open the sudoers file: `sudo visudo`
 
@@ -96,7 +96,7 @@ Security Implications
 
 By following these steps, you can set up Ansible on your control node and managed nodes, and configure the necessary settings for automation.
 
-Step 7:
+- Step 7:
 
 1. Switch as "devops" user on Master and all nodes.
 
