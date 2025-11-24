@@ -25,7 +25,7 @@ apt install ansible -y
 
 - Step 2: Configuring Ansible Inventory File
 
-1. Open the inventory file: `2. 
+1. Open the inventory file:  
 
 ```
 sudo vi /etc/ansible/hosts`
