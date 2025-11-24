@@ -61,13 +61,13 @@ sudo vi /etc/ssh/sshd_config
 
     - Before: #PubkeyAuthentication yes
    
-    - After: PubkeyAuthentication yes (if it's not already set to yes)
+     - After: PubkeyAuthentication yes (if it's not already set to yes)
     
 - Uncomment and set PasswordAuthentication to yes (around line 66):
 
     - Before: #PasswordAuthentication no
     
-    - After: PasswordAuthentication yes
+     - After: PasswordAuthentication yes
       
 3. Repeat the steps on Managed Nodes.
 
