@@ -4,19 +4,19 @@ Ansible Managed Nodes and Control Nodes Setup Guide
 
 Table of Contents
 
-1. Step-1-installing-ansible-on-control-node
-2. Step-2-configuring-ansible-inventory-file
-3. Step-3-creating-a-user-on-control-node-and-managed-nodes
-4. Step-4-updating-sshd-config-file
-5. Step-5-enabling-password-authentication
-6. Step-6-configuring-sudo-privileges-for-ansible
+1. Step-1 Installing-ansible-on-control-node
+2. Step-2 Configuring-ansible-inventory-file
+3. Step-3 Creating-a-user-on-control-node-and-managed-nodes
+4. Step-4 Updating-sshd-config-file
+5. Step-5 Enabling-password-authentication
+6. Step-6 Configuring-sudo-privileges-for-ansible
 
 
-Step 1: Installing Ansible on Control Node
+- Step 1: Installing Ansible on Control Node
 
 
 ```
-sudo su
+sudo -s
 apt update -y
 apt install software-properties-common
 add-apt-repository --yes --update ppa:ansible/ansible
