@@ -76,7 +76,7 @@ apt install ansible -y
 ```
 sudo systemctl restart sshd
 ```
-
+OR
 ```
 sudo service ssh restart
 ```
