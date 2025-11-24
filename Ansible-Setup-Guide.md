@@ -25,7 +25,11 @@ apt install ansible -y
 
 - Step 2: Configuring Ansible Inventory File
 
-1. Open the inventory file: `sudo vi /etc/ansible/hosts`
+1. Open the inventory file: `2. 
+
+```
+sudo vi /etc/ansible/hosts`
+```
 
 2. Add IPs of the Managed Nodes in the "hosts" file.
 
@@ -41,8 +45,10 @@ apt install ansible -y
 
 - Step 4: Updating SSHD Config File
 
-1. Open the SSH config file: `sudo vi /etc/ssh/sshd_config`
-
+1. Open the SSH config file: 
+```
+sudo vi /etc/ssh/sshd_config
+```
 2. Update the following settings:
     
  - Uncomment and set PermitRootLogin to yes (around line 42):
@@ -67,7 +73,11 @@ apt install ansible -y
 
 - Step 5: Enabling Password Authentication
 
-1. Open the SSH config file: `sudo vi /etc/ssh/sshd_config.d/60-cloudimg-settings.conf`
+1. Open the SSH config file:
+2. 
+```
+sudo vi /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+```
 
 2. Update the `PasswordAuthentication` directive to `yes`.
 
@@ -85,7 +95,10 @@ sudo service ssh restart
 
 1. Open the sudoers file: `sudo visudo`
 
-2. Add the following line: `devops ALL=(ALL:ALL) NOPASSWD:ALL`
+2. Add the following line: 
+```
+devops ALL=(ALL:ALL) NOPASSWD:ALL
+```
 3. This grants the devops user sudo privileges without requiring a password.
 
 Security Implications
@@ -111,6 +124,7 @@ By following these steps, you can set up Ansible on your control node and manage
 - switch to the folder where the keys are stored
 
   `cd /home/devops/.ssh/ `
+
   - Run the copy command:
  
     ssh-copy-id  devops@<Private Ip of Node-1>
