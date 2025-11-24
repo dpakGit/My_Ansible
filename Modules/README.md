@@ -1,6 +1,8 @@
 Breaking Down the following Ansible Command:
 
+```
 ansible all -b -m ansible.builtin.package -a "name=docker.io state=present"
+```
 
 - ansible: This is the command-line tool for Ansible.
 
