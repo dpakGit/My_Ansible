@@ -71,7 +71,15 @@ Step 5: Enabling Password Authentication
 
 2. Update the `PasswordAuthentication` directive to `yes`.
 
-3. Restart the SSH service: `sudo systemctl restart sshd` or `sudo service ssh restart`
+3. Restart the SSH service : `Very important step`
+   
+```
+sudo systemctl restart sshd
+```
+
+```
+sudo service ssh restart
+```
 
 Step 6: Configuring Sudo Privileges for Ansible
 
