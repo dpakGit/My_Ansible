@@ -13,6 +13,10 @@ ansible all -b -m ansible.builtin.package -a "name=docker.io state=present"
 - -m: This option specifies the Ansible module to use. In this case, the module is ansible.builtin.package.
 
 - ansible.builtin.package: This is the module used to manage packages on remote hosts. It's a built-in module that supports various package managers like apt, yum, pip, etc.
+- The package name can also be written in the following way:
+```
+ansible all -b -m ansible.builtin.package -a "name=docker.io state=present"
+```
 
 - -a: This option stands for --args and is used to pass arguments to the module.
 
