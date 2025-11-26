@@ -1,4 +1,4 @@
----
+```
 ---
 - name: First Playbook            # Playbook name/description
   hosts: all                     # Target hosts (all hosts in inventory)
