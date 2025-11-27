@@ -17,10 +17,15 @@ Table of Contents
 
 ```
 sudo -s
+```
+```
 apt update -y
 apt install software-properties-common
 add-apt-repository --yes --update ppa:ansible/ansible
 apt install ansible -y
+```
+```
+ansible --version
 ```
 
 - Step 2: Configuring Ansible Inventory File
