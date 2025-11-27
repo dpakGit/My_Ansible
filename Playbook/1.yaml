@@ -1,0 +1,17 @@
+---
+- name: First Playbook
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Apache
+      apt:
+        name: apache2
+        state: present
+    - name: Copy Task
+      copy:
+        src: 1.yaml
+        dest: /opt
+    - name: Restart Apache
+      service:
+        name: apache2
+        state: restarted
