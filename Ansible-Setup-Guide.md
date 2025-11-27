@@ -132,9 +132,9 @@ By following these steps, you can set up Ansible on your control node and manage
 
   - Run the copy command:
  
-    ssh-copy-id  devops@<Private Ip of Node-1>
+    ssh-copy-id  devops@Private Ip of Node-1
 
-    ssh-copy-id  devops@<Private Ip of Node-2>
+    ssh-copy-id  devops@Private Ip of Node-2
 
     cd ..
 
