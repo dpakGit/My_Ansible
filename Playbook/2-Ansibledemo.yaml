@@ -1,0 +1,25 @@
+# This example was written by Rajendra Wagh Sir
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+    - name: start service httpd
+      ansible.builtin.service:
+        name: apache2
+        state: started
+    - name: Remove the file
+      ansible.builtin.file:
+        path: /var/www/html/
+        state: absent
+    - name: install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: https://github.com/Rajthetrainer/ansibledemo
+        dest: /var/www/html/
