@@ -117,8 +117,14 @@ By following these steps, you can set up Ansible on your control node and manage
 - Step 7:
 
 1. Switch as "devops" user on Master and all nodes.
+```
+sudo su - dvops
+```
+or
 
-  `sudo - devops`
+```
+sudo -iu dvops
+```
 
 2. Generate keypair on Control node
 
