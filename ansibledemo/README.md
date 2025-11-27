@@ -107,7 +107,7 @@ Here's the updated playbook:
 
 
 ### If you want to use the index.html file from the GitHub repository directly, you can use the get_url module to download the file`
-`get_url module~
+`get_url module`
 
 Here's how you can modify the playbook:
 
