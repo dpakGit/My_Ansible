@@ -1,7 +1,3 @@
-
-
-
-
 ### When the index.html file is in the same repository as the playbook, you can use the copy module to copy the file from the local directory to the remote server.
 
 Here's the updated playbook:
