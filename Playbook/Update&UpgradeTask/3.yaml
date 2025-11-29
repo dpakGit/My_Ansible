@@ -1,0 +1,26 @@
+---
+# apache_config.yml
+- name: Configure Apache on webservers
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Update apt cache and upgrade packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install Apache2
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+
+    - name: Copy prem.txt to /opt
+      ansible.builtin.copy:
+        src: file.txt
+        dest: /opt/file.txt
+        mode: '0644'
+
+    - name: Restart Apache2 service
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
