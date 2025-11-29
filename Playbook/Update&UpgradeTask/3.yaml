@@ -1,5 +1,4 @@
 ---
-# apache_config.yml
 - name: Configure Apache on webservers
   hosts: webservers
   become: yes
@@ -20,7 +19,8 @@
         dest: /opt/file.txt
         mode: '0644'
 
-    - name: Restart Apache2 service
+    - name: Ensure Apache2 service is started and enabled
       ansible.builtin.service:
         name: apache2
-        state: restarted
+        state: started
+        enabled: yes
