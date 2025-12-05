@@ -714,3 +714,81 @@ The specific settings you mentioned and their internal defaults are:
 To use the settings you originally saw (like **`become = yes`**), you need to **create** the file `/etc/ansible/ansible.cfg` and manually add those desired sections/values, or set them in a local `ansible.cfg` file for your project.
 
 Would you like me to show you an example of a minimalist `ansible.cfg` file with these settings so you can use them in your current project?
+
+
+
+
+
+
+Let's try to create a simple index.html file:
+
+bash
+ansible web_nodes -i inventory --become -m shell -a 'echo "Hello World!" > /var/www/html/index.html'
+
+
+If you're still unable to access the web page, please check the Apache error logs:
+
+bash
+ansible web_nodes -i inventory --become -m shell -a 'cat /var/log/httpd/error_log'
+
+
+Also, let's check the index.html file:
+
+bash
+ansible web_nodes -i inventory --become -m shell -a 'cat /var/www/html/index.html'
+
+
+If you're still unable to access the web page, let's check the status of Apache service:
+
+bash
+ansible web_nodes -i inventory --become -m shell -a 'systemctl status httpd'
+
+This will show you the current status of the Apache service.
+
+
+If you're still unable to access the web page, it's likely that Apache is not installed or not running. Let's try to install and start Apache again:
+
+bash
+ansible-playbook -i inventory playbook.yaml --limit web_nodes --become
+
+Make sure your playbook is correctly configured to install and start Apache.
+
+Also, you can check the status of Apache service:
+
+bash
+ansible web_nodes -i inventory --become -m shell -a 'systemctl status httpd'
+
+
+
+The package name apache2 is typically used on Debian-based systems, such as Ubuntu. Since your nodes are running Red Hat-based systems, the package name is httpd.
+
+To fix the issue, you should update your playbook to use the correct package name:
+
+- name: Install Apache
+  yum:
+    name: httpd
+    state: present
+
+### If you want to make your playbook more flexible and able to run on both Debian-based and Red Hat-based systems, you can use a variable to define the package name:
+
+- name: Install Apache
+  package:
+    name: "{{ apache_package_name }}"
+    state: present
+
+Then, define the apache_package_name variable in your inventory file or elsewhere:
+
+[all:vars]
+apache_package_name=httpd
+
+Alternatively, you can use a conditional statement to define the package name based on the OS family:
+
+- name: Define Apache package name
+  set_fact:
+    apache_package_name: "{{ 'apache2' if ansible_os_family == 'Debian' else 'httpd' }}"
+
+- name: Install Apache
+  package:
+    name: "{{ apache_package_name }}"
+    state: present
+
