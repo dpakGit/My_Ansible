@@ -1,0 +1,576 @@
+﻿⭐ ANSIBLE — ALL LEVELS (Basic → Intermediate → Expert)
+
+✅ LEVEL-1 (Basic) — Ansible
+
+1. What is Ansible?
+
+An automation tool for configuration management, application deployment, and orchestration. Agentless and uses SSH/WinRM.
+
+2. What is a Playbook?
+
+A YAML file that contains tasks to execute on remote machines.
+
+3. What does “agentless” mean?
+
+No software is installed on client nodes; Ansible uses SSH/WinRM.
+
+4. How do you check connectivity to all hosts?
+ansible all -m ping
+
+5. What is Inventory?
+
+A file containing host IPs, groups, and variables.
+
+6. What is Idempotency?
+
+Running the same play multiple times results in the same state.
+
+7. What are Ansible Modules?
+
+Small programs like yum, apt, copy, template, service.
+
+8. What is Ansible Galaxy?
+
+Public repository of roles.
+
+9. What is Ansible Vault?
+
+Used to encrypt sensitive information.
+
+10. What is a Task?
+
+A single automation step inside a play.
+
+🟦 LEVEL-2 (Intermediate) — Ansible
+1. What are Facts in Ansible?
+
+System information gathered from nodes.
+
+ansible all -m setup
+
+2. What are Handlers?
+
+Triggered only when notified by tasks (example: restart nginx).
+
+3. What is a Role?
+
+A structured way to organize tasks, handlers, templates, defaults, files, vars.
+
+4. What is the difference between copy and template?
+
+copy → static files
+
+template → uses Jinja2 variables
+
+5. What are Conditionals?
+
+Used for task execution logic:
+
+when: ansible_os_family == "Debian"
+
+6. What are Loops?
+
+Execute the same task for multiple items:
+
+loop:
+  - git
+  - nginx
+
+7. How do you pass variables from CLI?
+ansible-playbook app.yml -e "version=2.0"
+
+8. What is Dynamic Inventory?
+
+Inventory generated automatically from cloud API (AWS, Azure, GCP).
+
+9. How to run only specific tags?
+ansible-playbook site.yml --tags "install"
+
+10. What is check mode?
+
+Dry run:
+
+ansible-playbook site.yml --check
+
+🔥 LEVEL-3 (Expert) — Ansible
+1. Explain Ansible Pull vs Ansible Push.
+Push	Pull
+Controller pushes config	Client pulls from a Git repo
+Standard mode	Used for large-scale distributed systems
+2. What is Ansible Tower/AWX?
+
+A web UI + RBAC + Reports + Scheduling on top of Ansible.
+
+3. How do you implement Zero-Downtime deployments with Ansible?
+
+Use rolling updates
+
+Use serial: 1 or serial: 10%
+
+Integrate with load balancers
+
+4. How do you manage secrets across environments?
+
+Vault
+
+HashiCorp Vault
+
+AWS SSM/Secrets Manager
+
+Environment variables
+
+5. How do you optimize Ansible performance?
+
+pipelining = True
+
+Disable fact gathering when not required
+
+Use async tasks
+
+SSH multiplexing
+
+Limit tasks using tags
+
+6. What is Delegation in Ansible?
+
+Run a task on a different host:
+
+delegate_to: 127.0.0.1
+
+7. What is Ansible Collections?
+
+A packaging format for sharing plugins, roles, modules.
+
+8. How do you handle configuration drift?
+
+Run:
+
+--check
+
+Scheduled Tower/AWX jobs
+
+GitOps approach
+
+9. How do you integrate Ansible with CI/CD?
+
+Jenkins pipeline → run Ansible playbooks
+
+GitHub Actions → deploy with Ansible
+
+Use ansible-lint + molecule
+
+10. Why is Ansible preferred over Chef/Puppet?
+
+Agentless
+
+Simple YAML
+
+Easy learning curve
+
+No master/slave architecture
+
+Fast deployment
+
+⭐ TERRAFORM — ALL LEVELS (Basic → Intermediate → Expert)
+✅ LEVEL-1 (Basic) — Terraform
+1. What is Terraform?
+
+IaC tool for provisioning cloud infrastructure.
+
+2. What is HCL?
+
+HashiCorp Configuration Language.
+
+3. What does terraform init do?
+
+Downloads provider plugins and initializes backend.
+
+4. What does terraform plan do?
+
+Shows what changes will be applied.
+
+5. What is terraform apply?
+
+Executes infra changes.
+
+6. What is a Resource?
+
+Basic building block for cloud components.
+
+7. What is a Provider?
+
+Plugin to connect Terraform to AWS/Azure/GCP.
+
+8. What is a Variable?
+
+Input to Terraform.
+
+9. What is an Output?
+
+Printed result after apply.
+
+10. What is Terraform State File?
+
+A JSON file that stores the real infrastructure state.
+
+🟧 LEVEL-2 (Intermediate) — Terraform
+1. What is Remote Backend?
+
+Stores state remotely (S3, GCS, Terraform Cloud).
+
+2. Why is state locking needed?
+
+Prevents simultaneous modifications.
+
+3. What is a Terraform Module?
+
+Reusable collection of resources.
+
+4. What is terraform import?
+
+Brings existing resources under Terraform management.
+
+5. What are Data Sources?
+
+Read-only lookup values.
+
+6. What is the depends_on meta-argument?
+
+Manually enforce dependencies.
+
+7. What is locals?
+
+Reusable local expressions.
+
+8. What is terraform refresh?
+
+Updates state with real infrastructure.
+
+9. How to override variable values?
+
+CLI -var
+
+.tfvars file
+
+Environment variables
+
+10. What is Drift Detection?
+
+Comparing actual infra vs Terraform state.
+
+🔥 LEVEL-3 (Expert) — Terraform
+1. How do you design multi-environment Terraform (dev, stage, prod)?
+
+Common patterns:
+
+Workspaces
+
+Multiple folders
+
+Terragrunt
+
+Module + environment separation
+
+2. How do you manage secrets in Terraform?
+
+AWS Secrets Manager
+
+Vault
+
+SSM Parameter Store
+
+NEVER store secrets in .tfstate
+
+3. How do you implement Terraform in CI/CD?
+
+Steps:
+
+terraform fmt
+
+terraform validate
+
+terraform plan
+
+Manual approval
+
+terraform apply
+
+Upload artifacts/state
+
+4. What happens internally during terraform apply?
+
+Builds execution plan
+
+Creates dependency graph
+
+Executes graph in parallel
+
+Updates state
+
+5. How do you handle Terraform drift?
+
+terraform plan
+
+terraform refresh
+
+Drift detection in Terraform Cloud
+
+GitOps practices
+
+6. What is a Custom Provider?
+
+A Go-based plugin to integrate Terraform with new APIs.
+
+7. How do you structure large Terraform projects?
+
+Modules
+
+Separate environments
+
+Remote state
+
+Naming conventions
+
+GitOps approach
+
+8. What are Terraform Provisioners? Why are they discouraged?
+
+Provisioners run scripts after resource creation.
+They’re discouraged because:
+
+Non-declarative
+
+Hard to track failures
+
+Better to use Ansible instead
+
+9. How do you debug Terraform?
+TF_LOG=DEBUG
+TF_LOG_PATH=logs.txt
+
+10. What is Terragrunt?
+
+Wrapper around Terraform providing:
+
+DRY structure
+
+Remote state management
+
+Multi-environment management
+
+⭐ AWS — ALL LEVELS (Basic → Intermediate → Expert)
+✅ LEVEL-1 (Basic) — AWS
+1. What is AWS?
+
+Amazon’s cloud platform offering compute, storage, networking.
+
+2. What is EC2?
+
+Virtual server for compute.
+
+3. What is S3?
+
+Object storage service.
+
+4. What is IAM?
+
+Identity and Access Management.
+
+5. What is VPC?
+
+Virtual Private Cloud — your own isolated network.
+
+6. What is RDS?
+
+Managed relational database.
+
+7. What is CloudWatch?
+
+Monitoring service.
+
+8. What is an AMI?
+
+OS template for EC2.
+
+9. What is Auto Scaling?
+
+Automatically scales EC2 instances.
+
+10. What is Security Group?
+
+Inbound/outbound firewall.
+
+🟩 LEVEL-2 (Intermediate) — AWS
+1. Difference between SG and NACL?
+Security Group	NACL
+Stateful	Stateless
+Instance level	Subnet level
+Allow only	Allow + deny
+2. What is ALB vs NLB vs CLB?
+
+ALB → HTTP/HTTPS, routing
+
+NLB → TCP/UDP, high performance
+
+CLB → Legacy
+
+3. What is EBS vs EFS?
+EBS	EFS
+Block storage	Shared file system
+Single instance	Multiple instances
+4. What is NAT Gateway?
+
+Allows private instances to access the internet.
+
+5. What is VPC Peering?
+
+Connects two VPCs privately.
+
+6. What is CloudTrail used for?
+
+Auditing and logging API calls.
+
+7. What is Route53?
+
+DNS service.
+
+8. What are S3 Storage Classes?
+
+Standard, Intelligent-Tiering, IA, One Zone IA, Glacier, Deep Archive.
+
+9. What is Elastic Beanstalk?
+
+PaaS for application deployment.
+
+10. What is AWS Organizations?
+
+Multi-account governance service.
+
+🔥 LEVEL-3 (Expert) — AWS
+1. Explain a Highly Available VPC Architecture.
+
+Multi-AZ
+
+Public & private subnets
+
+ALB in public subnets
+
+ASG in private subnets
+
+RDS Multi-AZ
+
+NAT Gateway in public subnet
+
+2. How to design multi-account AWS (best practice)?
+
+Root account
+
+Security account
+
+Network account
+
+Dev/Stage/Prod accounts
+
+Centralized IAM
+
+SCP policies
+
+3. How to secure S3 buckets?
+
+Block public access
+
+Bucket policy restriction
+
+IAM least privilege
+
+Enable default encryption
+
+Enable CloudTrail data events
+
+4. What is AWS Well-Architected Framework?
+
+5 Pillars:
+
+Operational Excellence
+
+Reliability
+
+Performance
+
+Security
+
+Cost Optimization
+
+5. How do you maintain zero-downtime deployments?
+
+Blue/Green
+
+Rolling deployments
+
+Canary deployments
+
+Using ALB weighted routing
+
+ASG replacement strategy
+
+6. What is AWS WAF?
+
+Web Application Firewall for SQLi/XSS protection.
+
+7. Explain EKS architecture.
+
+Control plane (managed by AWS)
+
+Worker nodes (EC2 or Fargate)
+
+Node groups
+
+VPC CNI
+
+Ingress controller
+
+Cluster Autoscaler
+
+8. How do you monitor EC2?
+
+CloudWatch metrics
+
+CloudWatch Logs
+
+CloudWatch Alarms
+
+SSM Agent
+
+Custom metrics
+
+9. How do you troubleshoot a VPC connectivity issue?
+
+Check:
+
+Route tables
+
+NACLs
+
+Security Groups
+
+IGW/NAT
+
+ACL deny rules
+
+Private vs public subnet confusion
+
+VPC peering DNS resolution
+
+10. How do you optimize AWS cost?
+
+Right-sizing EC2
+
+Reserved Instances / Savings Plans
+
+S3 lifecycle policies
+
+Stop unused RDS/EC2
+
+Use Spot Instances
+
+Use CloudFront for caching

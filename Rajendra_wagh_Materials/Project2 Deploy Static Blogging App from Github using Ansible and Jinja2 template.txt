@@ -1,0 +1,132 @@
+Project: Deploy Static Blogging App from GitHub Using Ansible
+
+1️⃣ Prerequisites
+Control Node: Ansible installed (Ubuntu/Linux)
+Target Node: Ubuntu server(s) with SSH access
+User: devops with sudo privileges
+Tools: Git, Nginx (installed via Ansible)
+
+2️⃣ Folder Structure
+ansible_blog_project/
+├── hosts                     # Inventory file
+├── group_vars/
+│   └── webservers.yaml       # Variables for web servers
+├── roles/
+│   └── app_deploy/
+│       ├── tasks/
+│       │   └── main.yaml
+│       ├── templates/
+│       │   └── nginx.conf.j2
+│       └── handlers/
+│           └── main.yaml
+├── playbook.yaml              # Main playbook
+└── README.md                  # Optional project documentation
+
+3️⃣ Inventory File (hosts)
+[webservers]
+web1 ansible_host=172.31.64.20 ansible_user=devops   #write private ip of node server
+
+
+Replace 192.168.1.10 with your server IP ( in our case private ip of node server)
+
+4️⃣ Group Variables (group_vars/webservers.yaml)
+app_name: DevOpsBlog
+nginx_root: /var/www/devopsblog
+app_port: 80
+git_repo: "https://github.com/yourusername/devopsblog.git"  # Replace with your repo
+git_version: "main"  # Branch or tag
+
+5️⃣ Role: app_deploy
+a) Tasks (roles/app_deploy/tasks/main.yaml)
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Nginx and Git
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nginx
+    - git
+  become: yes
+
+- name: Clone application repository from GitHub
+  git:
+    repo: "{{ git_repo }}"
+    dest: "{{ nginx_root }}"
+    version: "{{ git_version }}"
+  become: yes
+
+- name: Configure Nginx using Jinja2 template
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/sites-available/{{ app_name }}
+  notify: Restart Nginx
+  become: yes
+
+- name: Enable Nginx site
+  file:
+    src: /etc/nginx/sites-available/{{ app_name }}
+    dest: /etc/nginx/sites-enabled/{{ app_name }}
+    state: link
+  become: yes
+
+- name: Remove default Nginx site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  become: yes
+
+b) Handlers (roles/app_deploy/handlers/main.yaml)
+---
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
+
+c) Jinja2 Template (roles/app_deploy/templates/nginx.conf.j2)
+server {
+    listen 80;
+    server_name _;
+
+    root {{ nginx_root }};
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+6️⃣ Main Playbook (playbook.yaml)
+---
+- name: Deploy Blogging Application from GitHub
+  hosts: webservers
+  become: yes
+  roles:
+    - app_deploy
+
+7️⃣ Steps to Run
+
+Navigate to project folder:
+cd ansible_blog_project/
+
+Run playbook:
+ansible-playbook -i hosts playbook.yaml
+
+Verify deployment:
+curl http://192.168.1.10 ( check with public ip of node server )
+You should see your static blogging app content from GitHub.
+
+8️⃣ Verification
+
+Check Nginx service:
+sudo systemctl status nginx
+
+Check site config:
+ls -l /etc/nginx/sites-enabled/
+
+Check deployed files:
+ls -l /var/www/devopsblog/
