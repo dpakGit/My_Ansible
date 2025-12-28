@@ -1,0 +1,472 @@
+1️⃣ What Is YAML?
+YAML (Yet Another Markup Language) is a human-readable data serialization format.
+Designed for configuration files, data storage, and data exchange.
+
+2️⃣ Purpose of Using YAML
+Represent data in key-value pairs.
+Define configuration files (Ansible, Kubernetes, Docker Compose).
+Share data between programs/services.
+Supports complex data structures (lists, dictionaries).
+
+3️⃣ Where to Use YAML?
+DevOps & Automation: Ansible playbooks, Kubernetes manifests
+CI/CD Pipelines: GitHub Actions, GitLab CI
+Configuration files: Docker Compose, CircleCI, TravisCI
+Data Serialization: Store structured data in readable format
+
+4️⃣ Comparison with Other Data Formats
+Feature							YAML						JSON					XML						Terraform (.tf)
+Readable							Very readable				    Medium					Hard to read				Medium
+Comments						✅ Yes						❌ No					✅ Yes					✅ Yes
+Hierarchy			Indentation		    Braces {}		    Tags <tag>  	    Braces {}
+Data Types			Scalars, Lists, Maps	    Scalars, Lists, Maps    Strings only	    Variables, Blocks
+Usage				Config, Automation	    Data transfer	    Document markup	    Infra as code
+
+5️⃣ YAML, XML, JSON Syntax: Example
+
+YAML
+
+person:
+  name: Raj
+  age: 35
+  skills:
+    - Ansible
+    - Terraform
+
+
+JSON
+
+{
+  "person": {
+    "name": "Raj",
+    "age": 35,
+    "skills": ["Ansible", "Terraform"]
+  }
+}
+
+
+XML
+
+<person>
+  <name>Raj</name>
+  <age>35</age>
+  <skills>
+    <skill>Ansible</skill>
+    <skill>Terraform</skill>
+  </skills>
+</person>
+
+6️⃣ Quick Check
+
+YAML uses indentation, not braces.
+Supports lists (- item) and maps (key: value).
+Human-friendly & easy to read.
+
+7️⃣ Basic Rules for YAML Syntax
+
+Use spaces, not tabs (2 spaces per level recommended).
+Key-value separator is : followed by a space.
+Lists start with - followed by a space.
+Strings with special characters can be quoted.
+
+8️⃣ Key Concepts in YAML Syntax
+Scalars: single values (string, number, boolean)
+Lists/Arrays: - item1
+Mappings/Objects: key: value
+Nested structures: indentation defines hierarchy
+
+9️⃣ YAML Syntax: Indentation
+person:
+  name: Raj
+  address:
+    city: Nashik
+    state: Maharashtra
+
+🔟 YAML Syntax: Comments
+# This is a comment
+name: Raj  # Inline comment
+
+1️⃣1️⃣ YAML Syntax: Block Scalar Styles
+Block Literal Style |
+
+Keeps line breaks
+
+description: |
+  This is line 1
+  This is line 2
+
+Output:
+This is line 1
+This is line 2
+
+Block Folded Style >
+
+Folds line breaks into spaces
+
+description: >
+  This is line 1
+  This is line 2
+
+Output:
+This is line 1 This is line 2
+
+1️⃣2️⃣ What Does a Basic YAML Script Look Like?
+# Ansible Example
+---
+- hosts: all
+  vars:
+    deploy_env: production
+    app_port: 8080
+    admin_name: Raj
+  tasks:
+    - name: Ping all hosts
+      ping:
+
+
+--- separates documents
+vars: defines variables
+tasks: defines actions
+
+******************
+1️⃣ Major Data Types in YAML
+YAML has three major data types:
+
+Data Type			Description			Example
+Scalars				Single value			name: Raj
+Lists/Sequences		Ordered collection		skills: [Ansible, Terraform]
+Maps/Mappings		Key-value pairs			address: {city: Nashik, state: Maharashtra}
+
+2️⃣ Scalars in YAML
+Scalars are single values: numbers, strings, booleans, null.
+
+name: Raj
+age: 35
+active: true
+notes: null
+
+3️⃣ Scalars: Numeric Data Type
+decimal: 35
+hex: 0x23
+octal: 0o44
+float: 3.14
+Numbers can be decimal, hex, octal, float.
+
+4️⃣ Scalars: String
+Strings can be:
+Plain
+greeting: Hello Raj
+Quoted
+single_quote: 'Hello Raj'
+double_quote: "Hello Raj"
+
+Multi-line
+message: |
+  Hello Raj
+  Welcome to YAML learning
+
+5️⃣ Lists in YAML (Sequences)
+Lists use - for each item:
+
+skills:
+  - Ansible
+  - Terraform
+  - Kubernetes
+
+Inline list:
+skills: [Ansible, Terraform, Kubernetes]
+
+6️⃣ Maps in YAML (Key-Value)
+
+Maps store key-value pairs:
+
+address:
+  city: Nashik
+  state: Maharashtra
+
+Inline map:
+address: {city: Nashik, state: Maharashtra}
+
+7️⃣ Quick Check
+Scalar = single value (age: 35)
+List/Sequence = ordered items (- item)
+Map/Mapping = key-value pairs (key: value)
+
+8️⃣ Mapping in YAML
+
+Mapping is the association between keys and values:
+
+person:
+  name: Raj
+  age: 35
+  city: Nashik
+
+9️⃣ Types of Mapping
+
+Block Mapping (indented)
+person:
+  name: Raj
+  age: 35
+
+Inline Mapping
+person: {name: Raj, age: 35}
+
+🔟 Differences Between Map and Mapping
+Feature			Map			Mapping
+Structure		Inline ({key: value})	Block (key: value with indentation)
+Readability		Less readable		More readable
+Use Case		Quick small data	Complex/nested data
+1️⃣1️⃣ Sequencing in YAML (Lists/Arrays)
+skills:
+  - Ansible
+  - Terraform
+  - Kubernetes
+
+Ordered list of items.
+Each item starts with - and space.
+
+1️⃣2️⃣ Sequencing: Nested Sequence
+projects:
+  - name: Project1
+    tasks:
+      - Design
+      - Development
+      - Testing
+  - name: Project2
+    tasks:
+      - Planning
+      - Implementation
+
+Sequence inside another sequence (nested).
+Indentation defines hierarchy.
+
+************************
+
+1️⃣ Anchors (&) in YAML
+Anchors let you define a piece of data once and reuse it later.
+
+defaults: &default_settings
+  user: raj
+  shell: /bin/bash
+  home: /home/raj
+
+&default_settings → anchor name
+
+2️⃣ Aliases (*) in YAML
+
+Aliases let you reference data defined with an anchor.
+admin:
+  <<: *default_settings
+  role: admin
+
+*default_settings → references the anchor
+
+<<: → merges the referenced map into the new map
+
+Resulting data for admin:
+
+user: raj
+shell: /bin/bash
+home: /home/raj
+role: admin
+
+3️⃣ References in YAML Configuration
+
+Anchors and aliases are collectively called references.
+Avoid repeating same data in multiple places.
+
+Example:
+
+webserver: &web
+  ip: 192.168.1.10
+  name: Raj-Web
+
+dbserver:
+  <<: *web
+  name: Raj-DB
+
+
+Output:
+
+dbserver:
+  ip: 192.168.1.10
+  name: Raj-DB
+
+4️⃣ When to Use References?
+
+Reuse common variables or configs
+Avoid duplicate entries in large YAML files
+Maintain consistency across multiple hosts/services
+
+5️⃣ What Are YAML Tags?
+
+Tags define the data type of a value explicitly.
+Syntax:
+!tag value
+
+Example: !str, !int, !bool
+
+6️⃣ Setting a Custom URI
+
+You can define a custom tag URI:
+
+!mytag:yaml.org,2002:str "Hello Raj"
+
+!mytag:uri → user-defined tag
+
+yaml.org,2002: → namespace for standard YAML types
+str → type (string)
+Other examples of standard YAML 1.1 types:
+yaml.org,2002:int → integer
+yaml.org,2002:bool → boolean
+yaml.org,2002:float → float
+Used in advanced YAML parsing
+
+7️⃣ Setting a Local Tag
+
+Local tags are shorter, relative tags:
+
+message: !raj "This is a local tag example"
+
+Easier to read than full URI
+
+Mostly for internal use in YAML parser
+
+8️⃣ Setting Data Type in YAML
+Type				Example
+String			name: "Raj"
+Integer			age: !int 35
+Float				pi: !float 3.14
+Boolean			active: !bool true
+Null				notes: !null ~
+Date				dob: !date 1990-01-01
+
+Example using tags:
+
+name: !str Raj
+age: !int 35
+active: !bool true
+notes: !null ~
+
+
+✅ Summary
+
+Anchors (&) → define reusable data
+
+Aliases (*) → reference anchor
+
+Tags (!tag) → explicitly define data type
+
+References → reuse data, maintain consistency
+
+Custom/Local tags → advanced type or domain-specific usage
+*****************************************************************
+
+1️⃣ YAML File Operations
+You can read, write, and validate YAML files in most programming languages.
+Loading → read YAML data into memory
+Saving/Dumping → write YAML data back to a file
+Validation → ensure syntax and types are correct
+
+2️⃣ Loading YAML Data
+ex:Python
+import yaml
+with open('data.yaml', 'r') as file:
+    data = yaml.safe_load(file)
+print(data['name'])  # Raj
+
+ex:JavaScript (Node.js)
+const fs = require('fs');
+const yaml = require('js-yaml');
+let fileContents = fs.readFileSync('data.yaml', 'utf8');
+let data = yaml.load(fileContents);
+console.log(data.name); // Raj
+
+ex:Java
+import org.yaml.snakeyaml.Yaml;
+import java.io.FileInputStream;
+import java.util.Map;
+Yaml yaml = new Yaml();
+FileInputStream input = new FileInputStream("data.yaml");
+Map<String, Object> data = yaml.load(input);
+System.out.println(data.get("name")); // Raj
+
+3️⃣ Saving YAML Data
+ex:Python
+import yaml
+data = {'name': 'Raj', 'age': 35}
+with open('output.yaml', 'w') as file:
+    yaml.dump(data, file)
+
+ex:JavaScript
+const fs = require('fs');
+const yaml = require('js-yaml');
+let data = {name: 'Raj', age: 35};
+fs.writeFileSync('output.yaml', yaml.dump(data));
+
+ex:Java
+import org.yaml.snakeyaml.Yaml;
+import java.io.FileWriter;
+Yaml yaml = new Yaml();
+Map<String, Object> data = Map.of("name", "Raj", "age", 35);
+FileWriter writer = new FileWriter("output.yaml");
+yaml.dump(data, writer);
+
+4️⃣ Validation and Error Handling
+Importance:
+Avoid syntax errors in YAML that break automation scripts (Ansible, Kubernetes, etc.)
+Ensure correct data types
+Techniques:
+Use language-specific YAML parser exceptions (yaml.YAMLError in Python)
+Use online YAML validators: https://yamlchecker.com
+Linting tools: yamllint
+
+Example (Python):
+import yaml
+try:
+    with open('data.yaml') as file:
+        data = yaml.safe_load(file)
+except yaml.YAMLError as e:
+    print("Error in YAML file:", e)
+
+5️⃣ Best Practices for Writing YAML Files
+
+Use 2 spaces per indentation level, not tabs
+Keep consistent formatting
+Use anchors & aliases for reusable data
+Use descriptive keys
+Add comments for clarity
+Validate YAML before use
+
+6️⃣ YAML as Configuration Files
+
+Widely used in DevOps:
+Ansible playbooks
+Kubernetes manifests
+Docker Compose
+Stores variables, environment settings, service configs
+
+Example (config.yaml):
+app_name: RajApp
+environment: production
+port: 8080
+
+7️⃣ YAML for Data Serialization
+
+Can serialize structured data for data exchange
+Supports scalars, lists, maps, nested structures
+Example (data.yaml):
+person:
+  name: Raj
+  age: 35
+  skills:
+    - Ansible
+    - Terraform
+
+This can be read by Python, JavaScript, Java, or any YAML parser
+
+8️⃣ Quick Check
+
+YAML is human-readable, hierarchical, and space-sensitive
+Supports scalars, sequences (lists), and mappings (maps)
+Use anchors, aliases, and tags for reusable or typed data
+Validate YAML files before using in automation

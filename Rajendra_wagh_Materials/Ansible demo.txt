@@ -1,0 +1,234 @@
+**************Installation steps ( 5 steps )*****************
+
+Pre requisite: Create 3 ubuntu-t3.medium EC2 instances. Name first as Ansible Server and others as Node1 and Node2.
+
+Step 1: install ansible on Controller Server
+https://docs.ansible.com/ansible/latest/installation_guide/installation_distros.html
+
+sudo su
+apt update -y
+apt install software-properties-common
+add-apt-repository --yes --update ppa:ansible/ansible
+apt install ansible -y 
+
+Check if ansible is installed successfully, type
+ansible --version
+
+Step 2: Do following on Ansible Server
+update inventory file with following command
+vi /etc/ansible/hosts
+Enter following on any line
+[webservers]
+172.31.73.20
+172.31.77.8
+
+Test connectivity:
+
+ansible all -u ubuntu -m ping
+
+Step 3: Do following on Ansible server and nodes(all 3 servers)
+
+sudo su
+
+create user named devops with following command
+
+adduser devops
+Enter password
+put fullname and all other fields as blank by pressing enter
+press Y to confirm
+user is created
+
+
+Step 4: Do following on Ansible server and nodes(all 3 servers)
+update sshd_config file with following commands
+
+vi /etc/ssh/sshd_config
+remove # from line no 42 and type yes after permitrootlogin and remove prohibit-password
+remove # from line no 47 publickeyauthentication
+remove # from line no 66 passwordauthentication
+
+cd /etc/ssh/sshd_config.d
+vi /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
+change passwordauthentication to yes and remove no
+
+Now restart ssh service with following command
+service ssh restart
+
+we will give sudo permissions to devops user we created on Ansible server and nodes with following commands
+####Be careful with following commands ( this file visudo can not be opened using vi. So it will be opened using nano editor)
+visudo
+It will open file in Nano editor. Now go to user privilege specification and enter following under user privilege specification below root entry 
+devops ALL=(ALL:ALL) NOPASSWD:ALL
+
+Now to come out of Nano editor type followings
+press ctr x
+press Y
+press Enter
+
+Step 5: Do following on Ansible server only to add trust relationship on ansible server. This will create a ssh key at Ansible server and copy the same on nodes
+
+su - devops
+ssh-keygen
+press enter 3 times
+cd /home/devops/.ssh/
+ssh-copy-id devops@172.31.73.20    #enter private ip of node1
+ssh-copy-id devops@172.31.77.8     #enter private ip of node2
+
+Type following command go back to devops directory 
+cd ..
+
+Test connectivity:
+
+ansible all -u ubuntu -m ping
+
+*******************************Use Ansible Server to perform tasks on Nodes*******************
+1. Adhoc commands: single liner Linux commands
+2. Modules: set of ansible libraries to perform to task on nodes. We can perform a task on nodes via modules adhoc
+3. Playbooks: set of modules. To perform multiple tasks on nodes.
+
+**********Example of Adhoc: Touch commands to create a file named myfile
+ansible all -a"touch myfile"  
+#alternate command
+ansible webservers -a"touch myfile"
+#check 
+ansible all -a"ls"
+#update all packages on all nodes
+ansible all -a"sudo apt update"
+#install apache2 on all nodes
+ansible all -a"sudo apt install apache2 -y"
+#check
+ansible all -a"sudo which apache2"
+#update packages on all nodes
+ansible all -a"sudo apt update -y"
+
+
+**********Example of modules: Ansible libraries to perform tasks performed in master to get tasks in the node
+#install docker on all nodes
+ansible all -b -m ansible.builtin.package -a"name=docker.io state=present"
+#check
+ansible all -a"sudo which docker"
+#uninstall docker on all nodes
+ansible all -b -m ansible.builtin.package -a"name=docker.io state=absent"
+#check
+ansible all -a"sudo which docker"
+
+
+ansible => command name
+all => all nodes
+-b => to execute commands as root
+-m => module
+ansible.builtin.package => actual module
+-a => argument
+docker.io=> package to be installed
+state =>
+present => to install
+absent => to uninstall
+updated => to update
+
+Example: create a new user john via module
+ansible all -b -m ansible.builtin.user -a"name=john create_home=yes"
+ansible all -a"sudo cat /etc/passwd"
+
+Example: create a file on ansible server and copy it on nodes
+touch abc.txt
+ansible all -b -m ansible.builtin.copy -a"src=abc.txt dest=/home/devops/"
+ansible all -a"ls"
+
+Example: create a file in nodes
+ansible all -b -m ansible.builtin.file -a"path=/home/devops/pqr.txt state=touch" 
+ansible all -a"ls"
+
+Example: create a directory in nodes
+ansible all -b -m ansible.builtin.file -a"path=/home/devops/mydirectory state=directory" 
+ansible all -a"ls"
+
+**************Basic Concepts & Terms******************
+Host: A remote machine managed by Ansible.
+
+Group: Several hosts grouped together that share a common attribute.
+
+Inventory: A collection of all the hosts and groups that Ansible manages. Could be a static file in the simple cases or we can pull the inventory from remote sources, such as cloud providers.
+
+Modules: Units of code that Ansible sends to the remote nodes for execution.
+
+Tasks: Units of action that combine a module and its arguments along with some other parameters.
+
+​​Playbooks: An ordered list of tasks along with its necessary parameters that define a recipe to configure a system.
+
+YAML: A popular and simple data format that is very clean and understandable by humans.
+
+**********************Playbooks****************
+Playbook is lists of modules written in a file in YAML format
+When you execute the playbook then all tasks are executed one by one
+
+Example: install apache and start the service on nodes
+vi raj.yml
+enter the code
+ansible-playbook raj.yml
+
+
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: remove apache
+      ansible.builtin.apt:
+        name: apache2
+        state: absent
+    - name: update all packages
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+    - name: install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+    - name: start service httpd
+      ansible.builtin.service:
+        name: apache2
+        state: started
+    - name: Remove the file
+      ansible.builtin.file:
+        path: /var/www/html/
+        state: absent
+    - name: install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: 'https://github.com/Rajthetrainer/ansibledemo'
+        dest: /var/www/html/
+
+
+---
+- hosts: all
+  become: yes
+  vars:
+   packagename: apache2	
+   source: rajfile
+   destination: /home/devops/		
+  tasks:
+    - name: remove {{packagename}}
+      ansible.builtin.apt:
+        name: '{{packagename}}'
+        state: absent
+    - name: Remove the file
+      ansible.builtin.file:
+        path: /var/www/html/
+        state: absent    
+    - name: update all packages
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+    - name: install apache httpd
+      ansible.builtin.apt:
+        name: apache2
+        state: present
+    - name: copy the file
+      ansible.builtin.copy:
+        src: '{{source}}'
+        dest: '{{destination}}'
+
+
+
