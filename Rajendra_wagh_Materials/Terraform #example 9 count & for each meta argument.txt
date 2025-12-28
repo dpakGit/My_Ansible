@@ -1,0 +1,34 @@
+#count meta argument which will calculate value of count from length of variable values
+
+variable "file_name" {
+  default = [
+    "pets.txt",
+    "dogs.txt",
+    "cats.txt",
+    "cows.txt",
+    "ducks.txt"
+  ]
+}
+
+resource "local_file" "pet" {
+  count    = length(var.file_name)
+  filename = var.file_name[count.index]
+  sensitive_content = "This is sample content for ${var.file_name[count.index]}"
+}
+
+for_each
+
+variable "file_name" {
+  default = {
+    pet1 = "pets.txt"
+    pet2 = "dogs.txt"
+    pet3 = "cats.txt"
+  }
+}
+
+resource "local_sensitive_file" "pet" {
+  for_each = var.file_name
+
+  filename = each.value
+  content  = "Sample content for ${each.value}"
+}

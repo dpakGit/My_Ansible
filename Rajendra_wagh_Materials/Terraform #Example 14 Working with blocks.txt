@@ -1,0 +1,101 @@
+Terraform: Working with Data Blocks
+
+Terraform data blocks (also called data sources) are used to read or fetch existing information from your provider (AWS, Azure, etc.) without creating resources.
+They allow Terraform to query existing infrastructure so that you can use those values inside your configuration.
+
+✅ Why use Data Blocks?
+
+Use data blocks when you need:
+
+✔ Information about existing resources
+
+Fetch the latest AMI ID
+
+Fetch VPC ID / subnet IDs from existing AWS environment
+
+Read an existing security group
+
+Get secrets from AWS Secrets Manager
+
+✔ Dynamic values
+
+Get value at runtime instead of hardcoding it
+
+✔ Dependency management
+
+Use depends_on if you want Terraform to fetch data after a specific resource is created
+
+🔹 Terraform Data Block Syntax
+data "<PROVIDER>_<TYPE>" "<NAME>" {
+  # arguments/filters...
+}
+
+
+Then you reference it as:
+
+data.<PROVIDER>_<TYPE>.<NAME>.<ATTRIBUTE>
+
+Example: Get Latest Amazon Linux 2 AMI
+provider "aws" {
+  region = "us-east-1"
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+
+  owners = ["amazon"]
+}
+
+resource "aws_instance" "web" {
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = "t2.micro"
+}
+
+output "ami_used" {
+  value = data.aws_ami.amazon_linux.id
+}
+
+Example: Data Block for VPC
+provider "aws" {
+  region = "us-east-1"
+}
+
+data "aws_vpc" "default" {
+  default = true
+}
+
+resource "aws_subnet" "demo" {
+  vpc_id            = data.aws_vpc.default.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+output "default_vpc_id" {
+  value = data.aws_vpc.default.id
+}
+
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+# Read existing Default Security Group
+data "aws_security_group" "sg" {
+  name = "default"
+}
+
+resource "aws_instance" "web" {
+  ami           = "ami-0c02fb55956c7d316"
+  instance_type = "t2.micro"
+
+  vpc_security_group_ids = [data.aws_security_group.sg.id]
+}
+
+output "used_security_group" {
+  value = data.aws_security_group.sg.id
+}

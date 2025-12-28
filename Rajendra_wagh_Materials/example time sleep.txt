@@ -1,0 +1,13 @@
+provider "time" {}
+
+resource "time_sleep" "wait" {
+  destroy_duration = "5m"
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-0c02fb55956c7d316"
+  instance_type = "t3.micro"
+
+  # This forces the sleep to happen before destroy
+  depends_on = [time_sleep.wait]
+}

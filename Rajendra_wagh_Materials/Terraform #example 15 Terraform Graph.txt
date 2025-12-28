@@ -1,0 +1,82 @@
+Terraform Example for Graph Visualization
+main.tf
+provider "aws" {
+  region = "us-east-1"
+}
+
+# 1️⃣ VPC
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+}
+
+# 2️⃣ Subnet depends on VPC
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+}
+
+# 3️⃣ Security Group depends on VPC
+resource "aws_security_group" "web_sg" {
+  name        = "web-sg"
+  description = "Allow HTTP"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 80
+    to_port     = 80
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# 4️⃣ EC2 Instance depends on Subnet + SG
+resource "aws_instance" "web" {
+  ami           = "ami-0c02fb55956c7d316" # Amazon Linux
+  instance_type = "t2.micro"
+
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  tags = {
+    Name = "web-server"
+  }
+}
+
+⭐ How Terraform Sees This Dependency Graph
+Graph structure (simplified):
+aws_vpc.main
+   ↓
+aws_subnet.public
+   ↓
+aws_instance.web
+
+aws_vpc.main
+   ↓
+aws_security_group.web_sg
+   ↓
+aws_instance.web
+
+
+
+⭐ Generate the Graph Image
+Step 1 — Install Graphviz (one-time)
+
+Ubuntu:
+
+sudo apt install graphviz
+
+
+Windows:
+
+choco install graphviz
+
+Step 2 — Generate graph.png
+
+Run inside your Terraform project folder:
+
+terraform graph | dot -Tpng > graph.png
+
+
+Now open graph.png → you will see all resource dependencies.

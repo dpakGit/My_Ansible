@@ -1,0 +1,42 @@
+#example 7 - resource dependencies
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+# Configure the AWS Provider
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "web5" {
+  ami           = "ami-04b4f1a9cf54c11d0"
+  instance_type = "t3.micro"
+ #### vpc_security_group_ids = ["${aws_security_group.example.id}"]
+  tags = {
+    Name = "MyWebServer"
+  }
+ depends_on = [
+    aws_security_group.example
+  ] 
+}
+
+resource "aws_security_group" "example" {
+   ingress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+output "sgid" {
+  value = aws_security_group.example.id
+}
+

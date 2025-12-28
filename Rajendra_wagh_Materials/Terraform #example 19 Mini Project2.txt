@@ -1,0 +1,112 @@
+Mini Project 2: “EC2 Web Server + Security Group + User Data”
+
+A simple infra that deploys:
+
+1 EC2 instance (Amazon Linux 2)
+
+Security group allowing SSH + HTTP
+
+User-data to auto-install Apache
+
+Output the public IP + URL
+
+Perfect for Terraform beginners.
+
+📁 Project Structure
+ec2-webserver/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+
+🧱 main.tf
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+resource "aws_security_group" "web_sg" {
+  name        = "webserver-sg"
+  description = "Allow SSH and HTTP"
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "web" {
+  ami           = var.ami
+  instance_type = var.instance_type
+  security_groups = [aws_security_group.web_sg.name]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y httpd
+              systemctl enable httpd
+              systemctl start httpd
+              echo "<h1>Hello from Terraform EC2 Webserver</h1>" > /var/www/html/index.html
+              EOF
+
+  tags = {
+    Name = "Terraform-EC2-Webserver"
+  }
+}
+
+📌 variables.tf
+variable "region" {
+  default = "us-east-1"
+}
+
+variable "ami" {
+  description = "Amazon Linux 2 AMI"
+  default     = "ami-0c2b8ca1dad447f8a"
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+📤 outputs.tf
+output "public_ip" {
+  value = aws_instance.web.public_ip
+}
+
+output "website_url" {
+  value = "http://${aws_instance.web.public_ip}"
+}
+
+▶️ Run it
+terraform init
+terraform apply
+
+
+Then open:
+
+http://<public-ip>

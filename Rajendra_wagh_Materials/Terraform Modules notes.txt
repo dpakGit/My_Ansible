@@ -1,0 +1,754 @@
+📌 What is a Terraform Module?
+
+A module is simply a folder that contains Terraform configuration files (main.tf, variables.tf, outputs.tf, etc.).
+Every Terraform project is already a module — called the root module.
+
+Modules help you:
+
+Reuse code
+
+Organize infrastructure
+
+Follow standards
+
+Reduce complexity
+
+Avoid copy-paste errors
+
+🟦 Why Modules?
+✔ 1. Reusability
+
+Write something once → use it multiple times.
+Example: A standard EC2 setup, IAM role, VPC, etc.
+
+✔ 2. Maintainability
+
+Instead of editing 10 files in 10 projects, update one module → all projects get the fix.
+
+✔ 3. Standardization
+
+Your org can enforce:
+
+Naming conventions
+
+Mandatory tags
+
+Security checks
+
+Logging standards
+
+Example: A “secure-S3” module that always blocks public access.
+
+✔ 4. Composition
+
+Modules can be combined together like Lego blocks:
+
+Network module
+
+Compute module
+
+Database module
+
+Monitoring module
+
+🟩 Types of Terraform Modules
+
+Terraform has 3 kinds of modules:
+
+1️⃣ Local Modules
+
+These are modules stored on your local filesystem.
+
+Example directory structure:
+
+project/
+ ├── main.tf
+ ├── modules/
+ │    └── ec2/
+ │         ├── main.tf
+ │         ├── variables.tf
+ │         └── outputs.tf
+
+
+Use like:
+
+module "web" {
+  source = "./modules/ec2"
+  instance_type = "t3.micro"
+}
+
+2️⃣ Remote Modules (Terraform Registry)
+
+These modules are stored remotely on the Terraform Registry or GitHub.
+
+Example:
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "5.5.0"
+
+  name = "demo"
+  cidr = "10.0.0.0/16"
+}
+
+When to Use Registry Modules?
+
+To speed up development
+
+When industry-standard modules exist (VPC, RDS, EKS)
+
+For best practices already built-in
+
+3️⃣ Private Registry Modules
+
+From Terraform Cloud / Enterprise.
+Used inside organizations for internal standardized modules.
+
+🟧 Module Inputs & Outputs
+Inputs = variables.tf
+
+Used to pass values into modules.
+
+Example:
+
+variable "instance_type" {
+  type    = string
+  default = "t3.micro"
+}
+
+
+Use inside main.tf:
+
+resource "aws_instance" "this" {
+  ami           = "ami-123456"
+  instance_type = var.instance_type
+}
+
+Outputs = outputs.tf
+
+Used to expose values out of modules.
+
+Example:
+
+output "public_ip" {
+  value = aws_instance.this.public_ip
+}
+
+
+Use in root module:
+
+output "server_ip" {
+  value = module.web.public_ip
+}
+
+🟪 Module Versioning
+
+Works only for remote registry modules.
+
+Example:
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+}
+
+
+Version constraints:
+
+= 5.5.0 → exact version
+
+>= 5.0 → minimum
+
+<= 5.0 → maximum
+
+~> 5.0 → minor changes allowed
+
+~> 5.3.0 → only patch updates allowed
+
+Why important?
+
+Ensures production stability
+
+Prevents breaking changes
+
+Allows safe upgrades
+
+🟫 Module Composition (Lego architecture)
+
+Composition means modules calling other modules.
+
+Example project structure:
+
+modules/
+ ├── network/
+ ├── compute/
+ └── database/
+main.tf
+
+
+Root module:
+
+module "vpc" {
+  source = "./modules/network"
+}
+
+module "web" {
+  source       = "./modules/compute"
+  subnet_id    = module.vpc.public_subnet_id
+}
+
+module "db" {
+  source    = "./modules/database"
+  vpc_id    = module.vpc.vpc_id
+  subnet_id = module.vpc.private_subnet_id
+}
+
+
+Benefits:
+
+Clean architecture
+
+Reusable building blocks
+
+Easy to maintain
+
+Team ownership per module
+
+🟨 Module Registry vs Local Modules — When to Use What?
+Use Case	Local Module	Registry Module
+Organization internal standards	✔ Yes	❌ No
+Quick development	❌ Slow	✔ Fast
+Need highly customizable code	✔ Yes	❌ Maybe
+Team controls all code	✔ Yes	❌ No
+Industry best practices	❌ Your responsibility	✔ Already built
+Versioning required	❌ Manual	✔ Built-in
+
+Conclusion:
+
+Use local modules → Custom, organization-specific logic
+
+Use registry modules → Standard components like VPC, RDS, EKS
+
+🟦 Bonus — Minimal Working Module Example
+🔹 Folder:
+modules/ec2
+ ├── main.tf
+ ├── variables.tf
+ └── outputs.tf
+
+main.tf
+resource "aws_instance" "server" {
+  ami           = var.ami
+  instance_type = var.instance_type
+}
+
+variables.tf
+variable "ami" {}
+variable "instance_type" {}
+
+outputs.tf
+output "id" {
+  value = aws_instance.server.id
+}
+
+Usage
+module "web" {
+  source = "./modules/ec2"
+  ami = "ami-0c94855ba95c71c99"
+  instance_type = "t3.micro"
+}
+
+output "server_id" {
+  value = module.web.id
+}
+**********************************************************************
+
+Project1
+
+Part 1: Create Project Structure
+
+Create a folder:
+
+my-terraform-project/
+ ├── main.tf
+ ├── variables.tf
+ ├── outputs.tf
+ └── modules/
+      └── ec2/
+            ├── main.tf
+            ├── variables.tf
+            └── outputs.tf
+
+🧩 Part 2: Build the EC2 Module
+
+Go inside:
+
+cd modules/ec2
+
+2.1 👉 variables.tf
+
+These are inputs for the module.
+
+variable "instance_name" {
+  type        = string
+  description = "Name of EC2 instance"
+}
+
+variable "instance_type" {
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "ami" {
+  type        = string
+  description = "AMI ID for instance"
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = {}
+}
+
+2.2 👉 main.tf
+
+Resource using these variables.
+
+resource "aws_instance" "server" {
+  ami           = var.ami
+  instance_type = var.instance_type
+
+  tags = merge(
+    {
+      Name = var.instance_name
+    },
+    var.tags
+  )
+}
+
+
+💡 merge() allows callers to add extra tags without breaking module.
+
+2.3 👉 outputs.tf
+
+Expose useful values:
+
+output "public_ip" {
+  value = aws_instance.server.public_ip
+}
+
+output "instance_id" {
+  value = aws_instance.server.id
+}
+
+
+🎉 Module is ready!
+
+🧪 Part 3: Use the Module in Root Project
+
+Go back to the root folder:
+
+cd ../..
+
+
+Create main.tf:
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+module "webserver" {
+  source = "./modules/ec2"
+
+  instance_name = "my-web"
+  ami           = "ami-0c94855ba95c71c99"
+  instance_type = "t3.micro"
+
+  tags = {
+    environment = "dev"
+    project     = "demo"
+  }
+}
+
+output "server_public_ip" {
+  value = module.webserver.public_ip
+}
+
+🧪 Part 4: Initialize & Test
+
+Run:
+
+terraform init
+terraform plan
+terraform apply
+
+
+Result:
+
+EC2 instance created
+
+Public IP will be printed from module
+
+🧱 Part 5: Reuse the Module (Multiple Instances)
+
+Add to main.tf:
+
+module "app_server" {
+  source = "./modules/ec2"
+  instance_name = "app"
+  ami = "ami-0c94855ba95c71c99"
+  instance_type = "t3.small"
+}
+
+
+Or even use count:
+
+module "batch_servers" {
+  count = 3
+  source = "./modules/ec2"
+  instance_name = "batch-${count.index}"
+  ami           = "ami-0c94855ba95c71c99"
+}
+
+📦 Part 6: Best Practices for Reusable Modules
+✔ Always include:
+
+main.tf
+
+variables.tf
+
+outputs.tf
+
+README.md (optional but recommended)
+
+✔ Naming convention:
+module-name/
+  main.tf
+  variables.tf
+  outputs.tf
+
+✔ Use meaningful variable names
+✔ Keep resource names consistent
+✔ Always output important attributes
+✔ Use tags merge() to enforce standards
+📤 Part 7: Publish Your Module to GitHub (Optional)
+git init
+git add .
+git commit -m "initial module"
+git remote add origin <your-github-url>
+git push -u origin main
+
+
+Use it from GitHub:
+
+module "web" {
+  source = "github.com/<yourname>/terraform-ec2-module"
+  instance_name = "test"
+  ami = "ami-0c94855ba95c71c99"
+}
+
+🧩 Part 8: Module Composition ********************************************************
+
+Use module output as input to another module.
+
+Example:
+
+EC2 module
+
+Security group module
+
+Usage:
+
+module "sg" {
+  source = "./modules/security-group"
+}
+
+module "web" {
+  source = "./modules/ec2"
+  ami = "ami-0c94855ba95c71c99"
+  instance_name = "web"
+  instance_type = "t3.micro"
+  security_group_id = module.sg.id
+}
+******************************************************************************************
+
+Project 2:
+
+📌 Step 1 — root variables.tf
+variable "ami" {}
+variable "instance_type" {}
+
+📌 Step 2 — root terraform.tfvars
+ami = "ami-123"
+instance_type = "t3.micro"
+
+📌 Step 3 — root main.tf
+module "ec2" {
+  source        = "./modules/ec2"
+  ami           = var.ami
+  instance_type = var.instance_type
+}
+
+📌 Step 4 — module variables.tf
+variable "ami" {}
+variable "instance_type" {}
+
+📌 Step 5 — module main.tf
+resource "aws_instance" "server" {
+  ami           = var.ami
+  instance_type = var.instance_type
+}
+
+🧠 Why do we need variables declared in both root and module?
+
+Because:
+
+Root variable = receives values from .tfvars
+
+Module variable = receives values from root
+
+They are not connected automatically.
+
+Terraform does not allow a module to directly access root variables or .tfvars values.
+
+*****************************************************
+
+1. Module Registry — Industry Pattern
+
+Large teams never hardcode modules via source = "./modules/vpc" in production.
+
+Instead, they use:
+
+1️⃣ Terraform Private Module Registry (Terraform Cloud / TFE)
+
+This is the most common pattern in medium–large orgs.
+
+Examples:
+
+module "vpc" {
+  source  = "appteam/vpc/aws"
+  version = "1.2.3"
+}
+
+
+Benefits:
+
+Version control (lock to versions)
+
+Central reusable modules
+
+Compliance & security reviews done once
+
+Documentation auto-generated
+
+Browse/search modules easily
+
+2️⃣ GitHub/GitLab Modules
+
+Common for small/medium teams.
+
+module "vpc" {
+  source  = "git::https://github.com/org/modules.git//vpc?ref=v1.0.0"
+}
+
+
+Production teams always use a tag (ref=v1.0.0) — not main branch.
+
+3️⃣ Public Terraform Registry
+
+Used when:
+
+Using community modules
+
+Using verified AWS/GCP/Azure modules
+
+Example:
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+}
+
+🧪 2. Testing Terraform Modules — Real Industry Approach
+
+Professional teams treat Terraform modules like software packages.
+
+✔ 1. Unit Testing using Terratest (Go)
+
+Most popular enterprise tool.
+
+Example test:
+
+terraformOptions := &terraform.Options{
+  TerraformDir: "../modules/vpc",
+}
+
+output := terraform.Output(t, terraformOptions, "vpc_id")
+require.NotEmpty(t, output)
+
+
+What Terratest tests:
+
+Does module create expected resources?
+
+Are outputs correct?
+
+Does apply/destroy work cleanly?
+
+✔ 2. Linting + Static Checks
+
+Tools:
+
+Tool	Purpose
+tflint	Syntax + best practices + provider rules
+checkov	Security + compliance checks
+tfsec	Deep security scanning
+terraform fmt	Formatting
+terraform validate	Syntax validation
+
+CI pipeline example:
+
+terraform fmt -check
+terraform validate
+tflint
+checkov -d .
+
+✔ 3. Integration Testing (Test Environments)
+
+Module is deployed temporarily in:
+
+Dev account
+
+Sandbox
+
+Ephemeral environments
+(Using GitHub Actions/Terraform Cloud)
+
+Steps:
+
+terraform init
+
+terraform plan
+
+terraform apply into a test account
+
+Run tests
+
+terraform destroy
+
+This ensures:
+
+Module actually works in cloud
+
+No breaking changes occur in real deployments
+
+✔ 4. Policy as Code (Sentinel / OPA)
+
+Enterprises add compliance rules like:
+
+Must have mandatory tags
+
+Public S3 buckets not allowed
+
+Must use specific AMIs
+
+Must have ALB logging enabled
+
+VPC CIDR ranges must follow company rules
+
+These run during terraform plan.
+
+🔢 3. Semantic Versioning — MUST for Module Stability
+
+Teams use SemVer:
+
+MAJOR.MINOR.PATCH   →   2.4.1
+
+✔ PATCH version (x.x.1)
+
+Bug fix
+
+Docs update
+
+No breaking changes
+
+✔ MINOR version (x.1.x)
+
+Add new features
+
+Add new optional variables
+
+No breaking changes
+
+✔ MAJOR version (1.x.x → 2.x.x)
+
+Breaking changes
+
+Removing variables
+
+Renaming outputs
+
+Changing resource names
+
+Changing expected input format
+
+🛑 How Companies Avoid Breaking Infra Accidentally
+
+Root module uses:
+
+version = "~> 2.4"
+
+
+This means:
+
+Accept 2.4.x
+
+Reject incompatible 3.x.x
+
+Teams only upgrade MAJOR versions manually after review.
+
+🧱 Real Folder Structure Used in Companies
+terraform-modules/
+  vpc/
+    main.tf
+    variables.tf
+    outputs.tf
+    README.md
+    examples/
+      simple/
+      with-nat/
+    tests/
+  ec2/
+  eks/
+  alb/
+
+
+Root project:
+
+prod/
+  main.tf
+  variables.tf
+  terraform.tfvars
+
+dev/
+  main.tf
+  variables.tf
+  terraform.tfvars
+
+🏢 CI/CD Pipeline for Modules (Industry Standard)
+1. Push to module repo
+2. Run linting (tflint, tfsec, fmt)
+3. Run unit tests (Terratest)
+4. Run integration tests (sandbox deploy)
+5. Publish module to Registry
+6. Tag release (v1.2.0)
+
+💼 Industry Best Practices Summary
+
+✔ Treat modules like software packages
+✔ Publish modules in Private Registry
+✔ Use semantic versioning
+✔ Test modules (unit + integration)
+✔ Use linting & security tools
+✔ Never use modules from main branch
+✔ Always pin module version
+✔ Use examples folder + README

@@ -1,0 +1,112 @@
+Mini Project: “Static Website Hosting on S3 + CloudFront + ACM”
+
+A clean real-world mini-project you can finish in 20–30 minutes.
+
+📌 Project Goal
+
+Deploy a static website using:
+
+S3 (website bucket)
+
+CloudFront (CDN)
+
+ACM Certificate (HTTPS)
+
+Route53 (optional — if you have a domain)
+
+📁 Project Structure
+terraform-s3-website/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── s3.tf
+├── cloudfront.tf
+
+🧱 Step 1 — Provider + Backend (main.tf)
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+🪣 Step 2 — Create S3 Bucket (s3.tf)
+
+Static website hosting + public access block disabled + bucket policy.
+
+resource "aws_s3_bucket" "website" {
+  bucket = var.bucket_name
+}
+
+resource "aws_s3_bucket_public_access_block" "public" {
+  bucket = aws_s3_bucket.website.id
+  block_public_acls   = false
+  block_public_policy = false
+  ignore_public_acls  = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_website_configuration" "config" {
+  bucket = aws_s3_bucket.website.id
+
+  index_document {
+    suffix = "index.html"
+  }
+}
+
+
+Upload a simple file:
+
+resource "aws_s3_object" "index" {
+  bucket       = aws_s3_bucket.website.bucket
+  key          = "index.html"
+  content      = "<h1>Hello from Terraform Website!</h1>"
+  content_type = "text/html"
+}
+
+🌐 Step 3 — CloudFront distribution (cloudfront.tf)
+resource "aws_cloudfront_distribution" "cdn" {
+  enabled = true
+
+  origin {
+    domain_name = aws_s3_bucket.website.bucket_regional_domain_name
+    origin_id   = "s3-origin"
+  }
+
+  default_cache_behavior {
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "s3-origin"
+    viewer_protocol_policy = "redirect-to-https"
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+}
+
+⚙️ Step 4 — Variables (variables.tf)
+variable "region" {
+  default = "us-east-1"
+}
+
+variable "bucket_name" {
+  default = "my-terraform-demo-bucket-12345"
+}
+
+📤 Step 5 — Outputs (outputs.tf)
+output "website_url" {
+  value = aws_cloudfront_distribution.cdn.domain_name
+}

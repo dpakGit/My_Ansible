@@ -1,0 +1,62 @@
+Example: Import an AWS S3 Bucket
+Step 1 — Create the Terraform resource block
+
+Create a file main.tf:
+
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_s3_bucket" "demo" {
+  # Intentionally empty — Terraform will fill details after import
+}
+
+
+⚠️ Do NOT write bucket = "name" yet, because Terraform doesn't know it until import.
+
+Step 2 — Run the import command
+
+Use your existing bucket name:
+
+terraform init
+terraform import aws_s3_bucket.demo my-existing-bucket-name
+
+
+This will output something like:
+
+aws_s3_bucket.demo: Import prepared!
+  Prepared aws_s3_bucket for import
+aws_s3_bucket.demo: Import complete!
+  Imported aws_s3_bucket (ID: my-existing-bucket-name)
+
+Step 3 — See the imported data
+
+Run:
+
+terraform show
+
+
+Terraform will display everything it discovered about the S3 bucket.
+
+Step 4 — Update your resource block
+
+After import, you must update the resource block so it matches AWS.
+
+Example:
+
+resource "aws_s3_bucket" "demo" {
+  bucket = "my-existing-bucket-name"
+}
+
+📌 Important Notes
+✔ Import does NOT create the resource
+
+It only links Terraform to an existing AWS resource.
+
+✔ You must manually fill the Terraform code after import
+
+Otherwise future terraform plan will show changes.
+
+✔ You can import any AWS resource
+
+S3, EC2, VPC, IAM, RDS, Route53, etc.

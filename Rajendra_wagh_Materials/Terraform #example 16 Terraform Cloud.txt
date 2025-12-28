@@ -1,0 +1,245 @@
+✔ Workspace setup
+✔ AWS credentials setup
+✔ Project structure
+✔ Terraform code (VPC + Subnets + EC2)
+✔ GitHub repo
+✔ CI/CD pipeline: GitHub → Terraform Cloud → AWS
+
+This is the most industry-standard setup.
+
+🎯 Final Goal Architecture
+GitHub Repo  →  Terraform Cloud  →  AWS
+                     |
+               Runs Plan/Appy
+                     |
+                VPC + EC2
+
+🚀 STEP 1 — Create Terraform Cloud Organization + Workspace
+
+Go to: https://app.terraform.io
+
+Create an organization (example: raj-org)
+
+Create a workspace → Choose:
+"Version Control Workflow"
+
+Connect to GitHub
+
+Select your Terraform repo (we will create soon)
+
+🔐 STEP 2 — Set AWS Credentials in Terraform Cloud
+
+Go to:
+Workspace → Variables → Environment Variables
+
+Add these environment variables:
+
+Key	Value	Sensitive
+AWS_ACCESS_KEY_ID	your key	Yes
+AWS_SECRET_ACCESS_KEY	your secret	Yes
+AWS_DEFAULT_REGION	ap-south-1	No
+
+✔ Mark the first two as Sensitive
+✔ Terraform Cloud will inject these during plan/apply
+✔ No credentials in GitHub code
+
+📁 STEP 3 — Project Structure (GitHub Repo)
+
+Create a GitHub repo:
+
+terraform-aws-vpc-ec2/
+│
+├── main.tf
+├── variables.tf
+├── outputs.tf
+└── provider.tf
+
+🧩 STEP 4 — Terraform Cloud Backend Configuration
+
+Create provider.tf:
+
+terraform {
+  cloud {
+    organization = "raj-org"
+
+    workspaces {
+      name = "aws-vpc-ec2"
+    }
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.region
+}
+
+🌐 STEP 5 — Variables File
+
+variables.tf:
+
+variable "region" {
+  default = "ap-south-1"
+}
+
+variable "project" {
+  default = "terraform-cloud-demo"
+}
+
+🏗️ STEP 6 — VPC + Subnets + EC2 Code
+
+main.tf:
+
+# ---------------------------
+# VPC
+# ---------------------------
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "${var.project}-vpc"
+  }
+}
+
+# ---------------------------
+# Subnet
+# ---------------------------
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "${var.project}-public-subnet"
+  }
+}
+
+# ---------------------------
+# Internet Gateway
+# ---------------------------
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "${var.project}-igw"
+  }
+}
+
+# ---------------------------
+# Route Table
+# ---------------------------
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "${var.project}-public-rt"
+  }
+}
+
+# Route table association
+resource "aws_route_table_association" "public_assoc" {
+  route_table_id = aws_route_table.public_rt.id
+  subnet_id      = aws_subnet.public.id
+}
+
+# ---------------------------
+# EC2 Instance
+# ---------------------------
+data "aws_ami" "linux" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+  owners = ["amazon"]
+}
+
+resource "aws_instance" "vm" {
+  ami           = data.aws_ami.linux.id
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public.id
+
+  tags = {
+    Name = "${var.project}-ec2"
+  }
+}
+
+📤 STEP 7 — Outputs
+
+outputs.tf:
+
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+
+output "ec2_public_ip" {
+  value = aws_instance.vm.public_ip
+}
+
+🌍 STEP 8 — Push Code to GitHub
+git init
+git add .
+git commit -m "Initial Terraform Cloud project"
+git branch -M main
+git remote add origin https://github.com/<your-username>/terraform-aws-vpc-ec2.git
+git push -u origin main
+
+
+Terraform Cloud (already connected) will automatically:
+
+✔ Detect new commit
+✔ Run Plan
+✔ Wait for you to Approve
+✔ Apply → Create resources in AWS
+
+⚙️ STEP 9 — CI/CD Workflow Explanation
+How it works:
+
+You push code → GitHub
+
+GitHub notifies Terraform Cloud
+
+Terraform Cloud:
+
+Downloads code
+
+Runs Terraform plan
+
+Shows cost estimation
+
+Shows changes
+
+You click Confirm & Apply
+
+TFC provisions infra in AWS
+
+No need to run Terraform locally.
+🧪 STEP 10 — Destroy Infrastructure
+
+Inside Terraform Cloud workspace:
+
+Go to:
+
+Settings → Destruction & Deletion → Queue destroy plan
+
+Confirm → Resources destroyed safely.
+
+🎉 You now have:
+
+✔ Terraform Cloud Workspace
+✔ AWS credentials securely stored
+✔ A GitHub repo
+✔ VPC + Subnet + EC2 deployed
+✔ Remote backend
+✔ Full CI/CD pipeline (GitHub → TFC → AWS)

@@ -1,0 +1,48 @@
+terraform {
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "public_key" {
+  filename = "${path.module}/id_rsa.pub"
+  content  = tls_private_key.ssh_key.public_key_openssh
+}
+
+resource "local_sensitive_file" "private_key" {
+  filename = "${path.module}/id_rsa"
+  content  = tls_private_key.ssh_key.private_key_pem
+}
+
+resource "aws_key_pair" "mykey" {
+  key_name   = "my-terraform-key"
+  public_key = tls_private_key.ssh_key.public_key_openssh
+}
+
+resource "aws_instance" "my_ec2" {
+  ami           = "ami-0cae6d6fe6048ca2c"   # Example N.Virginia AMI (Amazon Linux 2)
+  instance_type = "t2.micro"
+
+  key_name = aws_key_pair.mykey.key_name
+
+  tags = {
+    Name = "MyEC2"
+  }
+}
+

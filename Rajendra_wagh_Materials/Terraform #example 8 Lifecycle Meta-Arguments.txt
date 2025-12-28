@@ -1,0 +1,74 @@
+#Terraform Lifecycle Meta-Arguments
+
+Terraform’s lifecycle block is used inside a resource to control how it behaves during apply operations.
+
+1. Create before destroy: Used when replacing a resource (for example, updating immutable fields). Terraform will create the new one first, then destroy the old one.
+Useful for avoiding downtime — ensures new instance is up before old one is terminated.
+
+resource "aws_instance" "example" {
+  ami           = "ami-04b4f1a9cf54c11d0"
+  instance_type = "t2.micro"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+2. Prevent destroy: Prevents Terraform from accidentally deleting an important resource. If you try to terraform destroy or update it in a way that requires replacement, Terraform will throw an error. Works only during updates or destroys, not during the initial creation. To delete it later, remove prevent_destroy = true, then run terraform apply or terraform destroy.
+
+
+resource "aws_instance" "example" {
+  ami           = "ami-04b4f1a9cf54c11d0"
+  instance_type = "t2.micro"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+
+3. Ignore changes: Tells Terraform to ignore specific attributes when they change outside Terraform (e.g., manually updated tags).
+
+resource "aws_instance" "example" {
+  ami           = "ami-04b4f1a9cf54c11d0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "MyServer"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+
+4. To keep both resources - old as well as new
+
+Step 1 — Protect old resource
+resource "aws_instance" "old" {
+  ami = "ami-000111"
+  instance_type = "t2.micro"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+Step 2 — Create a new resource with NEW name or NEW key
+resource "aws_instance" "new" {
+  ami = "ami-999888"
+  instance_type = "t2.micro"
+}
+
+
+Terraform now keeps:
+
+aws_instance.old → cannot be destroyed
+
+aws_instance.new → created as new one
+
+Both remain.

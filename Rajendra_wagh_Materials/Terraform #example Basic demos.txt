@@ -1,0 +1,285 @@
+#demo 1:
+
+resource "local_file" "pet" {
+	filename = "pets.txt"
+	content = "We love pets!"
+}
+
+#demo 2:
+
+resource "aws_instance" "webserver" {
+	ami = "ami-04b4f1a9cf54c11d0"
+	instance_type = "t2.micro"
+}
+
+#demo 3:
+#please write unique bucket name in small letters
+
+resource "aws_s3_bucket" "databucket" {
+	bucket = "webserver-data-bucket-project-rajendra-iit" 
+}
+
+#demo 4:update a resource
+
+resource "local_file" "pet" {
+	filename = "pets.txt"
+	content = "We love pets!"
+	file_permission = "0700"
+}
+
+#demo 5: input variables. we can update resources by changing variables.tf file only. No need to change main.tf.
+
+#create variables.tf file ( we can merge variables directly in main.tf file also )
+
+variable "filename" {
+	default = "abc.txt"
+}
+
+variable "content" {
+	default = "we love all birds!"
+}
+
+variable "ami" {
+	default = "ami-04b4f1a9cf54c11d0"
+}
+
+variable "instancetype" {
+	default = "t3.micro"
+}
+
+#create main.tf
+resource "local_file" "pet" {
+	filename = var.filename
+	content = var.content
+}
+resource "aws_instance" "webserver" {
+	ami = var.ami
+	instance_type = var.instancetype
+}
+
+# demo 6 all possible arguments in variable
+variable "filename" {
+	default = "abc.txt"
+	type = string
+	description = "filename"
+}
+
+# demo 7 - list type variable
+
+#create variable.tf
+
+variable "filename" {
+	default = ["abc.txt", "pqr.txt", "xyz.txt"]
+	type = list
+}
+variable "instancetype" {
+	default = ["t2.micro", "t3.micro"]
+	type = list
+}
+variable "ami" {
+	default = "ami-04b4f1a9cf54c11d0"
+}
+#create main.tf
+resource "local_file" "pet" {
+	filename = var.filename[2]
+	content = "this is pet file"
+}
+resource "aws_instance" "webserver" {
+	ami = var.ami
+	instance_type = var.instancetype[1]
+}
+
+# demo 8 - map type variable
+
+#create variable.tf
+
+variable "filename" {
+	default = ["abc.txt", "pqr.txt", "xyz.txt"]
+	type = list
+}
+variable "filecontent" {
+	type = map
+	default = {
+	  "stmt1" = "we love pet"
+	  "stmt2" = "we love animals"
+	}
+}
+
+variable "instancetype" {
+	default = ["t2.micro", "t3.micro"]
+	type = list
+}
+variable "ami" {
+	type = map
+	default = {
+	   "ubuntu" = "ami-04b4f1a9cf54c11d0"
+	   "linux"  = "ami-053a45fff0a704a47"	
+	}
+}
+#create main.tf
+resource "local_file" "pet" {
+	filename = var.filename[2]
+	content = var.filecontent["stmt1"]
+}
+resource "aws_instance" "webserver" {
+	ami = var.ami["linux"]
+	instance_type = var.instancetype[1]
+}
+
+# demo 9- variable constraints
+
+#create variable.tf
+
+variable "filename" {
+	default = ["abc.txt", "pqr.txt", "xyz.txt"]
+	type = list(string)
+}
+variable "filecontent" {
+	type = map(string)
+	default = {
+	  "stmt1" = "we love pet"
+	  "stmt2" = "we love animals"
+	}
+}
+
+variable "instancetype" {
+	default = ["t2.micro", "t3.small"]
+	type = list(string)
+}
+variable "ami" {
+	type = map(string)
+	default = {
+	   "ubuntu" = "ami-04b4f1a9cf54c11d0"
+	   "linux"  = "ami-053a45fff0a704a47"	
+	}
+}
+#create main.tf
+resource "local_file" "pet" {
+	filename = var.filename[2]
+	content = var.filecontent["stmt1"]
+}
+resource "aws_instance" "webserver" {
+	ami = var.ami["linux"]
+	instance_type = var.instancetype[1]
+}
+
+#demo 10 - set type variable - set is a unique list
+
+#create variable.tf
+
+variable "filename" {
+	default = ["abc.txt", "pqr.txt", "xyz.txt"]
+	type = set(string)
+}
+variable "filecontent" {
+	type = map(string)
+	default = {
+	  "stmt1" = "we love pet"
+	  "stmt2" = "we love animals"
+	}
+}
+
+variable "instancetype" {
+	default = ["t2.micro", "t3.small"]
+	type = set(string)
+}
+variable "ami" {
+	type = map(string)
+	default = {
+	   "ubuntu" = "ami-04b4f1a9cf54c11d0"
+	   "linux"  = "ami-053a45fff0a704a47"	
+	}
+}
+#create main.tf
+resource "local_file" "pet" {
+	filename = var.filename[2]
+	content = var.filecontent["stmt1"]
+}
+resource "aws_instance" "webserver" {
+	ami = var.ami["linux"]
+	instance_type = var.instancetype[1]
+}
+
+#demo 11 - Object type variable 
+
+#create variable.tf
+
+variable "file" {
+  type = object({
+    name    = string
+    content = string
+  })
+  default = {
+    name    = "webserver"
+    content = "hello"
+  }
+}
+
+variable "instance" {
+  type = object({
+    ami           = string
+    instance_type = string
+  })
+  default = {
+    ami           = "ami-04b4f1a9cf54c11d0"
+    instance_type = "t2.micro"
+  }
+}
+
+resource "aws_instance" "example" {
+  ami           = var.instance.ami
+  instance_type = var.instance.instance_type
+
+  tags = {
+    Name = var.file.name
+  }
+
+  user_data = var.file.content
+}
+
+#demo 12 - tuple type variable 
+
+#tuple type variable
+
+variable "kitty" {
+  default = ["cat", 7, true]
+  type    = tuple([string, number, bool])
+}
+
+
+# Output each element from the tuple
+output "kitty_name" {
+  value = var.kitty[0]
+}
+
+output "kitty_age" {
+  value = var.kitty[1]
+}
+
+output "kitty_is_cute" {
+  value = var.kitty[2]
+}
+
+# Output full tuple
+output "kitty_all" {
+  value = var.kitty
+}
+
+demo 13: multiple providers
+
+resource "local_file" "pet" {
+	filename = "pets.txt"
+	content = "We love pets!"
+}
+
+resource "aws_instance" "webserver" {
+	ami = "ami-04b4f1a9cf54c11d0"
+	instance_type = "t2.micro"
+}
+
+resource "aws_s3_bucket" "databucket" {
+	bucket = "webserver-data-bucket-project-rajendra-caltech" #please write unique bucket name in small letters
+}
+
+
+
