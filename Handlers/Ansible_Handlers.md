@@ -34,7 +34,7 @@ This approach ensures that:
 - Handlers are only executed when all tasks have been completed, reducing the risk of conflicts or incomplete changes.
 - Multiple tasks can notify the same handler, and it will only be executed once, after all tasks have been completed.
 For example, consider a playbook with multiple tasks that update different configuration files, and a handler that restarts the Apache service:
-
+```
 ---
 - name: First Playbook
   hosts: all
@@ -57,6 +57,7 @@ For example, consider a playbook with multiple tasks that update different confi
       service:
         name: apache2
         state: restarted
+```
 
 In this example, even though multiple tasks notify the Restart Apache handler, it will only be executed once, after all tasks have been completed, ensuring that Apache is restarted only once, with the updated configuration files.
 Key characteristics of Ansible Handlers:
@@ -76,7 +77,7 @@ Common uses for handlers include:
 •	Applying firewall rules after network configuration updates.
 •	Triggering other automation workflows based on specific events.
 Example –
-```   
+```  
  - name: Copy new configuration file
       ansible.builtin.copy:
         src: files/nginx.conf
@@ -92,7 +93,7 @@ Example –
 Same Handler can be triggered by multiple tasks:
 Yes, it is possible for the same Ansible handler to be triggered by multiple tasks. In fact, this is one of the benefits of using handlers in Ansible.
 Here's an example:
----
+```
 - name: First Playbook
   hosts: all
   become: yes
@@ -120,6 +121,7 @@ Here's an example:
       service:
         name: apache2
         state: restarted
+```
 
 Q: In the above example, the Restart Apache handler is triggered by three different tasks. When any of these tasks make a change, the Restart Apache handler will be notified and will restart the Apache service.
 Is it advisable?
@@ -181,7 +183,7 @@ my_playbook/
     |- handler.yml
 
 handlers/handler.yml
----
+```
 - name: Restart Nginx
   service:
     name: nginx
@@ -191,10 +193,9 @@ handlers/handler.yml
   service:
     name: apache2
     state: reloaded
-
+```
 playbook.yml
-
----
+```
 - name: Example Playbook
   hosts: localhost
   become: yes
@@ -212,6 +213,7 @@ playbook.yml
         name: apache2
         state: present
       notify: Reload Apache
+```
 In this example, we've defined two handlers in handlers/handler.yml: Restart Nginx and Reload Apache. We then include this file in our playbook.yml using the include directive under the handlers section.
 When a task notifies a handler, Ansible will look for the handler in the included file and execute it.
 Key takeaways
@@ -229,7 +231,7 @@ This is because Ansible doesn't automatically load handlers from separate files.
 Alternative to include directive
 In Ansible 2.4 and later, you can use the handlers keyword with a file path to include handlers. For example:
 
----
+```
 - name: Example Playbook
   hosts: localhost
   become: yes
@@ -237,12 +239,13 @@ In Ansible 2.4 and later, you can use the handlers keyword with a file path to i
     - handlers/handler.yml
   tasks:
     # ...
+```
 
 This is a more concise way to include handlers, but the include directive is still supported for backward compatibility.
 Best practice:
 It's a good practice to use the include directive or the handlers keyword to explicitly include handlers, as it makes your playbook more readable and maintainable.
 Example:
----
+```
 - name: Deploy DevOpsBlog application
   hosts: all
   become: yes
@@ -265,4 +268,4 @@ handler.yaml
   service:
     name: nginx
     state: restarted
-
+```
